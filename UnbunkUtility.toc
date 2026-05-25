@@ -1,5 +1,5 @@
 ## Interface: 120005
-## Title: Unbunk
+## Title: Unbunk Utility
 ## Notes: Utility addon
 ## Author: You
 ## Version: 1.0

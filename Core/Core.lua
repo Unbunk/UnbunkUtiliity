@@ -1,7 +1,7 @@
 -- Core/Core.lua
--- Main Unbunk window with navigation bar.
+-- Main UnbunkUtility window with navigation bar.
 
-Unbunk = {}
+UnbunkUtility = {}
 local registeredModules = {}
 local window
 local navbar
@@ -9,7 +9,7 @@ local contentArea
 local activeTab = nil
 local tabButtons = {}
 
-function Unbunk.RegisterModule(name, icon, createFn)
+function UnbunkUtility.RegisterModule(name, icon, createFn)
     table.insert(registeredModules, {
         name     = name,
         icon     = icon,
@@ -94,7 +94,7 @@ local function BuildNavbar()
 end
 
 local function CreateMainWindow()
-    window = CreateFrame("Frame", "UnbunkWindow", UIParent, "BackdropTemplate")
+    window = CreateFrame("Frame", "UnbunkUtilityWindow", UIParent, "BackdropTemplate")
     window:SetSize(600, 500)
     window:SetPoint("CENTER")
     window:SetMovable(true)
@@ -112,7 +112,7 @@ local function CreateMainWindow()
 
     local titleBar = window:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     titleBar:SetPoint("TOP", 0, -14)
-    titleBar:SetText("Unbunk")
+    titleBar:SetText("UnbunkUtility")
 
     local closeBtn = CreateFrame("Button", nil, window, "UIPanelCloseButton")
     closeBtn:SetPoint("TOPRIGHT", -4, -4)
@@ -140,7 +140,7 @@ local function CreateMainWindow()
     end
 end
 
-function Unbunk.OpenWindow()
+function UnbunkUtility.OpenWindow()
     if not window then return end
     if window:IsShown() then
         window:Hide()

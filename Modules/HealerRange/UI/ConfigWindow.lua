@@ -30,8 +30,8 @@ local function CreateHealerRangePanel(parent)
     testAlertBtn:SetPoint("TOPLEFT", testFrame, "TOPLEFT", 0, -4)
     testAlertBtn:SetText("Test Alert")
     testAlertBtn:SetScript("OnClick", function()
-        if SlashCmdList["UNBUNK"] then
-            SlashCmdList["UNBUNK"]("test")
+        if SlashCmdList["UNBUNKUTILITY"] then
+            SlashCmdList["UNBUNKUTILITY"]("test")
         end
     end)
     AddModule(testFrame, 30)
@@ -89,7 +89,7 @@ local function CreateHealerRangePanel(parent)
         end,
         onUnlock    = function()
             if HealerRangeAlert_SetUnlocked then HealerRangeAlert_SetUnlocked(true) end
-            print("|cffff4444[Unbunk]|r Alert unlocked — drag to reposition, then /ub lock to save.")
+            print("|cffff4444[UnbunkUtility]|r Alert unlocked — drag to reposition, then /ubu lock to save.")
         end,
         onLock      = function()
             if HealerRangeAlert_SetUnlocked then HealerRangeAlert_SetUnlocked(false) end
@@ -161,25 +161,25 @@ end
 local initHR = CreateFrame("Frame")
 initHR:RegisterEvent("ADDON_LOADED")
 initHR:SetScript("OnEvent", function(self, event, addonName)
-    if addonName ~= "Unbunk" then return end
+    if addonName ~= "UnbunkUtility" then return end
 
     local blizzPanel = CreateFrame("Frame")
-    blizzPanel.name = "Unbunk"
+    blizzPanel.name = "UnbunkUtility"
     local blizzTitle = blizzPanel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     blizzTitle:SetPoint("TOPLEFT", 16, -16)
-    blizzTitle:SetText("Unbunk")
+    blizzTitle:SetText("UnbunkUtility")
     local openBtn = CreateFrame("Button", nil, blizzPanel, "UIPanelButtonTemplate")
     openBtn:SetSize(160, 22)
     openBtn:SetPoint("TOPLEFT", 16, -80)
-    openBtn:SetText("Open Unbunk")
+    openBtn:SetText("Open UnbunkUtility")
     openBtn:SetScript("OnClick", function()
-        Unbunk.OpenWindow()
+        UnbunkUtility.OpenWindow()
         HideUIPanel(SettingsPanel)
     end)
     local cat = Settings.RegisterCanvasLayoutCategory(blizzPanel, blizzPanel.name)
     Settings.RegisterAddOnCategory(cat)
 
-    Unbunk.RegisterModule("Healer Range", nil, CreateHealerRangePanel)
+    UnbunkUtility.RegisterModule("Healer Range", nil, CreateHealerRangePanel)
 
     self:UnregisterEvent("ADDON_LOADED")
 end)

@@ -54,7 +54,7 @@ end
 local initDB = CreateFrame("Frame")
 initDB:RegisterEvent("ADDON_LOADED")
 initDB:SetScript("OnEvent", function(self, event, addonName)
-    if addonName ~= "Unbunk" then return end
+    if addonName ~= "UnbunkUtility" then return end
     InitDB()
     self:UnregisterEvent("ADDON_LOADED")
 end)
