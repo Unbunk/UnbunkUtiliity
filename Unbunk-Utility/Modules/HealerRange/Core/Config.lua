@@ -1,0 +1,60 @@
+-- Modules/HealerRange/Core/Config.lua
+
+HealerRangeDB = {}
+
+local DEFAULTS = {
+    soundPath    = nil,
+    soundKey     = "None",
+    enableSound  = true,
+    fontPath     = nil,
+    fontKey      = "2002 Bold",
+    fontSize     = 22,
+    outline      = "",
+    alertMessage = "Out of healer range!",
+    color        = { r = 1.0, g = 0.06, b = 0.0, a = 1.0 },
+    posX         = 0,
+    posY         = 100,
+}
+
+local FALLBACK_SOUND_ID = 8959
+
+local function InitDB()
+    for k, v in pairs(DEFAULTS) do
+        if HealerRangeDB[k] == nil then
+            if type(v) == "table" then
+                HealerRangeDB[k] = {}
+                for k2, v2 in pairs(v) do
+                    HealerRangeDB[k][k2] = v2
+                end
+            else
+                HealerRangeDB[k] = v
+            end
+        end
+    end
+end
+
+function HealerRangeCfg_Get(key)
+    return HealerRangeDB[key]
+end
+
+function HealerRangeCfg_Set(key, value)
+    HealerRangeDB[key] = value
+end
+
+function HealerRangePlaySound()
+    if not HealerRangeCfg_Get("enableSound") then return end
+    local path = HealerRangeCfg_Get("soundPath")
+    if path then
+        PlaySoundFile(path, "Master")
+    else
+        PlaySound(FALLBACK_SOUND_ID)
+    end
+end
+
+local initDB = CreateFrame("Frame")
+initDB:RegisterEvent("ADDON_LOADED")
+initDB:SetScript("OnEvent", function(self, event, addonName)
+    if addonName ~= "Unbunk" then return end
+    InitDB()
+    self:UnregisterEvent("ADDON_LOADED")
+end)
