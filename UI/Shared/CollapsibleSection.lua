@@ -65,20 +65,15 @@ function Unbunk_CreateCollapsibleSection(config)
     local labelAnchor = arrow
 
     if showCheckbox then
-        checkbox = CreateFrame("CheckButton", nil, headerBtn, "UICheckButtonTemplate")
-        checkbox:SetSize(20, 20)
-        checkbox:SetPoint("LEFT", arrow, "RIGHT", 6, 0)
-        if isChecked then checkbox:SetChecked(isChecked()) end
-        if onCheck then
-            checkbox:SetScript("OnClick", function(self)
-                onCheck(self:GetChecked())
-            end)
-        end
-        -- Empêche le click sur la checkbox de toggler la section
-        checkbox:SetScript("OnClick", function(self)
-            if onCheck then onCheck(self:GetChecked()) end
-        end)
-        labelAnchor = checkbox
+        checkbox = Unbunk_CreateCheckbox({
+            parent  = headerBtn,
+            label   = "",
+            checked = isChecked and isChecked() or false,
+            onClick = function(val) if onCheck then onCheck(val) end end,
+        })
+        checkbox.frame:SetPoint("LEFT", arrow, "RIGHT", 6, 0)
+        checkbox.frame:SetHeight(20)
+        labelAnchor = checkbox.frame
         result.checkbox = checkbox
     end
 
@@ -130,7 +125,7 @@ function Unbunk_CreateCollapsibleSection(config)
 
     function result.Refresh()
         if checkbox and isChecked then
-            checkbox:SetChecked(isChecked())
+            checkbox.SetChecked(isChecked())
         end
     end
 

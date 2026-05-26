@@ -21,6 +21,47 @@ local function CreateHealerRangePanel(parent)
         lastFrame = moduleFrame
     end
 
+    -- ── Enable checkbox ───────────────────────────────────────────────────────
+
+    local enableFrame = CreateFrame("Frame", nil, content)
+    enableFrame:SetHeight(24)
+
+    local enableCheckbox = Unbunk_CreateCheckbox({
+        parent  = enableFrame,
+        label   = "Enable Healer Range",
+        checked = HealerRangeCfg_Get("enabled") ~= false,
+        onClick = function(val)
+            HealerRangeCfg_Set("enabled", val)
+        end,
+    })
+    enableCheckbox.frame:SetPoint("TOPLEFT", enableFrame, "TOPLEFT", 0, 0)
+    AddModule(enableFrame, 24)
+
+    -- ── Probe status ──────────────────────────────────────────────────────────
+
+    local probeFrame = CreateFrame("Frame", nil, content)
+    probeFrame:SetHeight(30)
+
+    local probeMsg = probeFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    probeMsg:SetPoint("TOPLEFT", probeFrame, "TOPLEFT", 0, 0)
+    probeMsg:SetWidth(500)
+    probeMsg:SetJustifyH("LEFT")
+    probeMsg:SetWordWrap(true)
+    AddModule(probeFrame, 30)
+
+    -- ── Instance filter ───────────────────────────────────────────────────────
+
+    local iF = Unbunk_CreateInstanceFilter({
+        parent    = content,
+        getConfig = function() return HealerRangeCfg_Get("instanceFilter") end,
+        setConfig = function(key, val)
+            local filter = HealerRangeCfg_Get("instanceFilter")
+            filter[key] = val
+            HealerRangeCfg_Set("instanceFilter", filter)
+        end,
+    })
+    AddModule(iF.frame, iF.height)
+
     -- ── Test Alert ────────────────────────────────────────────────────────────
 
     local testFrame = CreateFrame("Frame", nil, content)
@@ -112,65 +153,26 @@ local function CreateHealerRangePanel(parent)
     })
     AddModule(pe.frame, pe.height)
 
-    -- ── Probe status ──────────────────────────────────────────────────────────
-
-    local probeFrame = CreateFrame("Frame", nil, content)
-    probeFrame:SetHeight(50)
-
-    local probe40Msg = probeFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-    probe40Msg:SetPoint("TOPLEFT", probeFrame, "TOPLEFT", 0, 0)
-    probe40Msg:SetWidth(500)
-    probe40Msg:SetJustifyH("LEFT")
-
-    local probe25Msg = probeFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-    probe25Msg:SetPoint("TOPLEFT", probeFrame, "TOPLEFT", 0, -20)
-    probe25Msg:SetWidth(500)
-    probe25Msg:SetJustifyH("LEFT")
-
-    AddModule(probeFrame, 50)
-
     local function RefreshProbeStatus()
-        local hasSpells = LibHealerRange and LibHealerRange.availableSpellProbeCount
-                          and LibHealerRange.availableSpellProbeCount > 0
-        if hasSpells then
-            probe40Msg:SetText("|cff00ff00Combat 40y (Druid, Monk, Paladin, Priest, Shaman) detection available via class spells.|r")
-        elseif LibHealerRange and LibHealerRange.availableItemProbe40y then
-            local itemId = LibHealerRange.availableItemProbe40y
-            local name = C_Item.GetItemInfo(itemId) or "unknown item"
-            local icon = select(10, C_Item.GetItemInfo(itemId))
-            local iconStr = icon and ("|T" .. icon .. ":14:14:2:0|t ") or ""
-            probe40Msg:SetText("|cff00ff00Combat 40y (Druid, Monk, Paladin, Priest, Shaman) detection available with " .. iconStr .. name .. ".|r")
+        if not HealerRange_HasCombatProbe() then
+            probeMsg:SetText("|cffff4444Combat range detection unavailable — your class has no friendly spell probe usable in combat. The alert will not trigger.|r")
         else
-            probe40Msg:SetText("|cffff4444Combat 40y (Druid, Monk, Paladin, Priest, Shaman) detection unavailable — buy any Scroll on the Auction House.|r")
-        end
-        if LibHealerRange and LibHealerRange.availableItemProbe25y then
-            local itemId = LibHealerRange.availableItemProbe25y
-            local name = C_Item.GetItemInfo(itemId) or "unknown item"
-            local icon = select(10, C_Item.GetItemInfo(itemId))
-            local iconStr = icon and ("|T" .. icon .. ":14:14:2:0|t ") or ""
-            probe25Msg:SetText("|cff00ff00Combat 25y (Evoker) detection available with " .. iconStr .. name .. ".|r")
-        else
-            probe25Msg:SetText("|cffff4444Combat 25y (Evoker) detection unavailable — buy any bandage on the Auction House.|r")
+            probeMsg:SetText("|cff00ff00Combat range detection available. Note: Evoker healers are ignored unless other healers are present in the group.|r")
         end
     end
 
     parent:HookScript("OnShow", function()
+        enableCheckbox.SetChecked(HealerRangeCfg_Get("enabled") ~= false)
         soundResult.Refresh()
         te.Refresh()
-        pe.Refresh()
         de.Refresh()
+        pe.Refresh()
+        iF.Refresh()
         RefreshProbeStatus()
-    end)
-
-    local bagUpdateFrame = CreateFrame("Frame")
-    bagUpdateFrame:RegisterEvent("BAG_UPDATE")
-    bagUpdateFrame:SetScript("OnEvent", function()
-        if parent:IsShown() then RefreshProbeStatus() end
     end)
 end
 
 -- ── Enregistrement ────────────────────────────────────────────────────────────
-
 local initHR = CreateFrame("Frame")
 initHR:RegisterEvent("ADDON_LOADED")
 initHR:SetScript("OnEvent", function(self, event, addonName)

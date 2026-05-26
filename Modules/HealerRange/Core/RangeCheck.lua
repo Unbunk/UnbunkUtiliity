@@ -7,18 +7,78 @@ local inCombat       = false
 local HEALER_ROLES   = { HEALER = true }
 local mainFrame      = CreateFrame("Frame")
 
+local RangeCheck = LibStub("LibRangeCheck-3.0")
+
+local function IsActiveInCurrentInstance()
+    local filter = HealerRangeCfg_Get("instanceFilter")
+    if not filter then return true end
+
+    local inInstance, instanceType = IsInInstance()
+
+    if not inInstance then
+        return filter.outdoor ~= false
+    elseif instanceType == "party" then
+        return filter.dungeon ~= false
+    elseif instanceType == "raid" then
+        return filter.raid ~= false
+    elseif instanceType == "pvp" or instanceType == "arena" then
+        return filter.battleground ~= false
+    end
+
+    return false
+end
+
+function HealerRange_HasCombatProbe()
+    for _ in RangeCheck:GetFriendCheckers(true) do
+        return true
+    end
+    return false
+end
+
+local EVOKER_SPEC_IDS = {
+    [1468] = true, -- Preservation (heal)
+}
+
+local function IsEvoker(unit)
+    local specID = GetInspectSpecialization(unit)
+    if specID and specID > 0 then
+        return EVOKER_SPEC_IDS[specID] == true
+    end
+    local _, class = UnitClass(unit)
+    return class == "EVOKER"
+end
+
 local function IsHealerInRange()
     if not IsInGroup() and not IsInRaid() then return nil end
+    if not HealerRange_HasCombatProbe() then return nil end
 
     local prefix = IsInRaid() and "raid" or "party"
     local count  = IsInRaid() and GetNumGroupMembers() or GetNumSubgroupMembers()
 
+    -- Vérifie s'il y a au moins un healer non-Evoker
+    local hasNonEvokerHealer = false
     for i = 1, count do
         local unit = prefix .. i
         if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
             if HEALER_ROLES[UnitGroupRolesAssigned(unit)] then
-                local dist = LibHealerRange:GetRange(unit)
-                if dist == nil or dist == 0 then
+                if not IsEvoker(unit) then
+                    hasNonEvokerHealer = true
+                    break
+                end
+            end
+        end
+    end
+
+    -- Pas de healer non-Evoker → pas de détection
+    if not hasNonEvokerHealer then return nil end
+
+    -- Détecte uniquement sur les healers non-Evoker
+    for i = 1, count do
+        local unit = prefix .. i
+        if UnitExists(unit) and not UnitIsDeadOrGhost(unit) then
+            if HEALER_ROLES[UnitGroupRolesAssigned(unit)] and not IsEvoker(unit) then
+                local minRange, maxRange = RangeCheck:GetRange(unit, false, true)
+                if maxRange and maxRange <= 40 then
                     return true
                 end
             end
@@ -31,6 +91,8 @@ end
 local function StartChecking()
     timer = 0
     mainFrame:SetScript("OnUpdate", function(self, elapsed)
+        if not HealerRangeCfg_Get("enabled") then return end
+        if not IsActiveInCurrentInstance() then return end
         if HealerRangeAlert_IsUnlocked() or HealerRangeAlert_IsTesting() then return end
 
         timer = timer + elapsed

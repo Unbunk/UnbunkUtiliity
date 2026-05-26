@@ -3,6 +3,7 @@
 HealerRangeDB = {}
 
 local DEFAULTS = {
+    enabled       = true,
     soundPath     = nil,
     soundKey      = "UnbunkUtility: No Heal",
     enableSound   = true,
@@ -15,6 +16,12 @@ local DEFAULTS = {
     posX          = 0,
     posY          = 100,
     alertDuration = 5,
+    instanceFilter = {
+        dungeon      = true,
+        raid         = true,
+        battleground = false,
+        outdoor      = false,
+    },
 }
 
 local FALLBACK_SOUND_ID = 8959

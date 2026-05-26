@@ -20,27 +20,22 @@ function HealerRange_CreateSoundPicker(parent, LSM, config)
 
     -- ── Checkbox ──────────────────────────────────────────────────────────────
 
-    local soundCheckbox = CreateFrame("CheckButton", nil, container, "UICheckButtonTemplate")
-    soundCheckbox:SetSize(24, 24)
-    soundCheckbox:SetPoint("TOPLEFT", container, "TOPLEFT", 0, 0)
-    soundCheckbox:SetChecked(getSoundEnable() ~= false)
-        soundCheckbox:SetScript("OnClick", function(self)
-            onEnableToggle(self:GetChecked())
-        end)
+    local soundCheckbox = Unbunk_CreateCheckbox({
+        parent  = container,
+        label   = "Alert sound",
+        checked = getSoundEnable() ~= false,
+        onClick = function(val) onEnableToggle(val) end,
+    })
+    soundCheckbox.frame:SetPoint("TOPLEFT", container, "TOPLEFT", 0, 0)
 
-    local soundCheckLabel = container:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    soundCheckLabel:SetPoint("LEFT", soundCheckbox, "RIGHT", 2, 0)
-    soundCheckLabel:SetText("Alert sound")
-
-    height = height + 28
+    height = height + 24
 
     -- ── Dropdown ──────────────────────────────────────────────────────────────
 
     local selectedText = nil
 
     if LSM then
-        local ddAnchor = container:CreateFontString(nil, "ARTWORK")
-        ddAnchor:SetPoint("TOPLEFT", container, "TOPLEFT", 0, -height)
+        local ddAnchor = soundCheckbox.frame
 
         local dd = HealerRange_CreateDropdown({
             parent        = container,
@@ -101,10 +96,9 @@ function HealerRange_CreateSoundPicker(parent, LSM, config)
     result.frame = container
     result.height = height
     result.soundCheckbox = soundCheckbox
-    result.selectedText  = selectedText
 
     function result.Refresh()
-        soundCheckbox:SetChecked(getSoundEnable() ~= false)
+        soundCheckbox.SetChecked(getSoundEnable() ~= false)
         if selectedText then
             selectedText:SetText(getSoundKey() or "(select a sound)")
         end

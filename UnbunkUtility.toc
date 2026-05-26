@@ -5,9 +5,14 @@
 ## Version: 1.0
 ## SavedVariables: HealerRangeDB, DeathAlertDB
 
+Libs/LibStub-1.0/LibStub.lua
+Libs/CallbackHandler-1.0/CallbackHandler-1.0.lua
+Libs/LibRangeCheck-3.0/LibRangeCheck-3.0.lua
 Media/Media.lua
 UI/Shared/ScrollBar.lua
 UI/Shared/Button.lua
+UI/Shared/TextInput.lua
+UI/Shared/Checkbox.lua
 UI/Shared/Dropdown.lua
 UI/Shared/CollapsibleSection.lua
 UI/Shared/TextEditor.lua
@@ -15,9 +20,9 @@ UI/Shared/PositionEditor.lua
 UI/Shared/SoundPicker.lua
 UI/Shared/FontPicker.lua
 UI/Shared/DurationEditor.lua
+UI/Shared/InstanceFilter.lua
 Core/Core.lua
 Core/SlashCommands.lua
-Modules/HealerRange/Libs/LibHealerRange.lua
 Modules/HealerRange/Core/Config.lua
 Modules/HealerRange/Core/Alert.lua
 Modules/HealerRange/Core/RangeCheck.lua

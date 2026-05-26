@@ -17,6 +17,20 @@ local function CreateAlertSection(parent, prefix)
         lastFrame = frame
     end
 
+    -- ── Instance filter ───────────────────────────────────────────────────────
+
+    local iF = Unbunk_CreateInstanceFilter({
+        parent    = parent,
+        getConfig = function() return DeathAlertCfg_Get(prefix .. "InstanceFilter") end,
+        setConfig = function(key, val)
+            local filter = DeathAlertCfg_Get(prefix .. "InstanceFilter")
+            filter[key] = val
+            DeathAlertCfg_Set(prefix .. "InstanceFilter", filter)
+        end,
+    })
+    iF.frame:ClearAllPoints()
+    AddWidget(iF.frame, iF.height)
+
     -- ── Test button ───────────────────────────────────────────────────────────
 
     local testFrame = CreateFrame("Frame", nil, parent)
@@ -148,6 +162,7 @@ local function CreateAlertSection(parent, prefix)
         te    = te.Refresh,
         pe    = pe.Refresh,
         de    = de.Refresh,
+        iF    = iF.Refresh,
     }
 end
 
@@ -207,12 +222,14 @@ local function CreateDeathAlertPanel(parent)
             allRefreshFns.tank.te()
             allRefreshFns.tank.pe()
             if allRefreshFns.tank.de then allRefreshFns.tank.de() end
+            if allRefreshFns.tank.iF then allRefreshFns.tank.iF() end
         end
         if allRefreshFns.healer then
             allRefreshFns.healer.sound()
             allRefreshFns.healer.te()
             allRefreshFns.healer.pe()
             if allRefreshFns.healer.de then allRefreshFns.healer.de() end
+            if allRefreshFns.healer.iF then allRefreshFns.healer.iF() end
         end
         tankCS.Refresh()
         healerCS.Refresh()

@@ -22,4 +22,4 @@ end)
 
 -- Textures
 local ICON_PATH = "Interface\\AddOns\\UnbunkUtility\\Media\\Icons\\"
-UNBUNK_ICON_DROPDOWN_ARROW = "Interface\\Buttons\\Arrow-Down-Disabled" 
+UNBUNK_ICON_DROPDOWN_ARROW = "Interface\\Buttons\\Arrow-Down-Up"

@@ -31,6 +31,18 @@ local DEFAULTS = {
     healerPosY        = 200,
     tankAlertDuration   = 5,
     healerAlertDuration = 5,
+    tankInstanceFilter = {
+        dungeon      = true,
+        raid         = true,
+        battleground = false,
+        outdoor      = false,
+    },
+    healerInstanceFilter = {
+        dungeon      = true,
+        raid         = true,
+        battleground = false,
+        outdoor      = false,
+    },
 }
 
 local function InitDB()

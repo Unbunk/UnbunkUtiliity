@@ -43,21 +43,19 @@ function Unbunk_CreateDurationEditor(config)
 
     -- ── Value display ─────────────────────────────────────────────────────────
 
-    local valueBox = CreateFrame("EditBox", nil, container, "InputBoxTemplate")
-    valueBox:SetSize(46, 20)
-    valueBox:SetPoint("LEFT", minusBtn.frame, "RIGHT", 4, 0)
-    valueBox:SetAutoFocus(false)
-    valueBox:SetNumeric(true)
-    valueBox:SetMaxLetters(3)
-    valueBox:SetText(tostring(getDuration() or 5))
-
-    valueBox:SetScript("OnEnterPressed", function(self)
-        local v = tonumber(self:GetText())
-        if v and v > 0 then
-            onDurationChange(v)
-        end
-        self:ClearFocus()
-    end)
+    local valueInput = Unbunk_CreateTextInput({
+        parent     = container,
+        width      = 46,
+        height     = 22,
+        numeric    = true,
+        maxLetters = 3,
+        text       = tostring(getDuration() or 5),
+        onEnter    = function(val)
+            if val and val > 0 then onDurationChange(val) end
+        end,
+    })
+    valueInput.frame:SetPoint("LEFT", minusBtn.frame, "RIGHT", 4, 0)
+    local valueBox = valueInput.editBox
 
     -- ── Plus button ───────────────────────────────────────────────────────────
 

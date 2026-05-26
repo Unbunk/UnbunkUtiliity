@@ -3,6 +3,25 @@
 local TANK_ROLES   = { TANK = true }
 local HEALER_ROLES = { HEALER = true }
 
+local function IsDeathAlertActiveInCurrentInstance(prefix)
+    local filter = DeathAlertCfg_Get(prefix .. "InstanceFilter")
+    if not filter then return true end
+
+    local inInstance, instanceType = IsInInstance()
+
+    if not inInstance then
+        return filter.outdoor ~= false
+    elseif instanceType == "party" then
+        return filter.dungeon ~= false
+    elseif instanceType == "raid" then
+        return filter.raid ~= false
+    elseif instanceType == "pvp" or instanceType == "arena" then
+        return filter.battleground ~= false
+    end
+
+    return false
+end
+
 local function ShowAlert(frame, duration)
     frame:Show()
     C_Timer.After(duration, function()
@@ -56,12 +75,12 @@ eventFrame:SetScript("OnEvent", function(self, event, unit)
             if guid and UnitIsDeadOrGhost(unit) and not alertedGuids[guid] then
                 alertedGuids[guid] = true
 
-                if TANK_ROLES[role] and DeathAlertCfg_Get("tankEnabled") then
+                if TANK_ROLES[role] and DeathAlertCfg_Get("tankEnabled") and IsDeathAlertActiveInCurrentInstance("tank") then
                     if not DeathAlert_IsTankTesting() then
                         ShowAlert(DeathAlert_GetTankFrame(), DeathAlertCfg_Get("tankAlertDuration") or 5)
                         DeathAlertPlaySound("tank")
                     end
-                elseif HEALER_ROLES[role] and DeathAlertCfg_Get("healerEnabled") then
+                elseif HEALER_ROLES[role] and DeathAlertCfg_Get("healerEnabled") and IsDeathAlertActiveInCurrentInstance("healer") then
                     if not DeathAlert_IsHealerTesting() then
                         ShowAlert(DeathAlert_GetHealerFrame(), DeathAlertCfg_Get("healerAlertDuration") or 5)
                         DeathAlertPlaySound("healer")

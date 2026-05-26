@@ -35,30 +35,33 @@ function HealerRange_CreatePositionEditor(parent, config)
 
     height = height + 18
 
-    local xBox = CreateFrame("EditBox", nil, container, "InputBoxTemplate")
-    xBox:SetSize(70, 20)
-    xBox:SetPoint("TOPLEFT", container, "TOPLEFT", 0, -height)
-    xBox:SetAutoFocus(false)
-    xBox:SetMaxLetters(6)
-    xBox:SetText(tostring(getX() or 0))
-    result.xBox = xBox
+    local xInput = Unbunk_CreateTextInput({
+        parent     = container,
+        width      = 70,
+        height     = 22,
+        numeric    = true,
+        maxLetters = 6,
+        text       = tostring(getX() or 0),
+        onEnter    = function(val)
+            if onApply then onApply(val, tonumber(yInput.GetText())) end
+        end,
+    })
+    xInput.frame:SetPoint("TOPLEFT", container, "TOPLEFT", 0, -height)
+    result.xBox = xInput.editBox
 
-    local yBox = CreateFrame("EditBox", nil, container, "InputBoxTemplate")
-    yBox:SetSize(70, 20)
-    yBox:SetPoint("LEFT", xBox, "RIGHT", 40, 0)
-    yBox:SetAutoFocus(false)
-    yBox:SetMaxLetters(6)
-    yBox:SetText(tostring(getY() or 0))
-    result.yBox = yBox
-
-    local function ApplyPos()
-        local x  = tonumber(xBox:GetText())
-        local yv = tonumber(yBox:GetText())
-        if onApply then onApply(x, yv) end
-    end
-
-    xBox:SetScript("OnEnterPressed", function(self) ApplyPos() self:ClearFocus() end)
-    yBox:SetScript("OnEnterPressed", function(self) ApplyPos() self:ClearFocus() end)
+    local yInput = Unbunk_CreateTextInput({
+        parent     = container,
+        width      = 70,
+        height     = 22,
+        numeric    = true,
+        maxLetters = 6,
+        text       = tostring(getY() or 0),
+        onEnter    = function(val)
+            if onApply then onApply(tonumber(xInput.GetText()), val) end
+        end,
+    })
+    yInput.frame:SetPoint("LEFT", xInput.frame, "RIGHT", 40, 0)
+    result.yBox = yInput.editBox
 
     local unlockBtnWidget = Unbunk_CreateButton({
         parent = container,
@@ -97,8 +100,8 @@ function HealerRange_CreatePositionEditor(parent, config)
     result.height = height
 
     function result.Refresh()
-        xBox:SetText(tostring(getX() or 0))
-        yBox:SetText(tostring(getY() or 0))
+        xInput.SetText(tostring(getX() or 0))
+        yInput.SetText(tostring(getY() or 0))
         currentlyUnlocked = isUnlocked and isUnlocked() or false
         unlockBtnWidget.SetText(currentlyUnlocked and "Lock" or "Unlock")
     end

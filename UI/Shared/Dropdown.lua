@@ -61,7 +61,6 @@ function HealerRange_CreateDropdown(config)
         arrowTex:SetSize(14, 14)
         arrowTex:SetPoint("RIGHT", toggleBtn, "RIGHT", -4, 0)
         arrowTex:SetTexture(UNBUNK_ICON_DROPDOWN_ARROW)
-        arrowTex:SetVertexColor(1, 1, 1, 1)
     end
 
     -- ── Drop frame ────────────────────────────────────────────────────────────

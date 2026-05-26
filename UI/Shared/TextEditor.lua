@@ -50,25 +50,24 @@ function HealerRange_CreateTextEditor(parent, config)
     -- ── Text content ──────────────────────────────────────────────────────────
 
     if showText then
-        local textBox = CreateFrame("EditBox", nil, container, "InputBoxTemplate")
-        textBox:SetSize(340, 20)
-        textBox:SetPoint("TOPLEFT", container, "TOPLEFT", 0, -height)
-        textBox:SetAutoFocus(false)
-        textBox:SetMaxLetters(100)
-        if getText then textBox:SetText(getText() or "") end
-        result.textBox = textBox
-
-        textBox:SetScript("OnEnterPressed", function(self)
-            local txt = self:GetText()
-            if txt and txt ~= "" and onTextChange then onTextChange(txt) end
-            self:ClearFocus()
-        end)
+        local textInput = Unbunk_CreateTextInput({
+            parent     = container,
+            width      = 340,
+            height     = 22,
+            maxLetters = 100,
+            text       = getText and getText() or "",
+            onEnter    = function(val)
+                if val and val ~= "" and onTextChange then onTextChange(val) end
+            end,
+        })
+        textInput.frame:SetPoint("TOPLEFT", container, "TOPLEFT", 0, -height)
+        result.textBox = textInput.editBox
 
         -- Color à droite
         if showColor then
             local colorSwatch = CreateFrame("Button", nil, container)
             colorSwatch:SetSize(16, 16)
-            colorSwatch:SetPoint("LEFT", textBox, "RIGHT", 10, 0)
+            colorSwatch:SetPoint("LEFT", textInput.frame, "RIGHT", 10, 0)
 
             local swatchTex = colorSwatch:CreateTexture(nil, "BACKGROUND")
             swatchTex:SetAllPoints()
@@ -111,40 +110,38 @@ function HealerRange_CreateTextEditor(parent, config)
                 sizeLbl:SetPoint("LEFT", colorLbl, "RIGHT", 10, 0)
                 sizeLbl:SetText("Size")
 
-                local sizeBox = CreateFrame("EditBox", nil, container, "InputBoxTemplate")
-                sizeBox:SetSize(46, 20)
-                sizeBox:SetPoint("LEFT", sizeLbl, "RIGHT", 4, 0)
-                sizeBox:SetAutoFocus(false)
-                sizeBox:SetNumeric(true)
-                sizeBox:SetMaxLetters(3)
-                sizeBox:SetText(tostring(getFontSize() or 22))
-                result.sizeBox = sizeBox
-
-                sizeBox:SetScript("OnEnterPressed", function(self)
-                    local v = tonumber(self:GetText())
-                    if v and v > 0 then onSizeChange(v) end
-                    self:ClearFocus()
-                end)
+                local sizeInput = Unbunk_CreateTextInput({
+                    parent     = parent,
+                    width      = 46,
+                    height     = 22,
+                    numeric    = true,
+                    maxLetters = 3,
+                    text       = tostring(getFontSize() or 22),
+                    onEnter    = function(val)
+                        if val and val > 0 then onSizeChange(val) end
+                    end,
+                })
+                sizeInput.frame:SetPoint("LEFT", sizeLbl, "RIGHT", 4, 0)
+                result.sizeBox = sizeInput.editBox
             end
         elseif showSize then
             local sizeLbl = container:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-            sizeLbl:SetPoint("LEFT", textBox, "RIGHT", 10, 0)
+            sizeLbl:SetPoint("LEFT", textInput.frame, "RIGHT", 10, 0)
             sizeLbl:SetText("Size")
 
-            local sizeBox = CreateFrame("EditBox", nil, container, "InputBoxTemplate")
-            sizeBox:SetSize(46, 20)
-            sizeBox:SetPoint("LEFT", sizeLbl, "RIGHT", 4, 0)
-            sizeBox:SetAutoFocus(false)
-            sizeBox:SetNumeric(true)
-            sizeBox:SetMaxLetters(3)
-            sizeBox:SetText(tostring(getFontSize() or 22))
-            result.sizeBox = sizeBox
-
-            sizeBox:SetScript("OnEnterPressed", function(self)
-                local v = tonumber(self:GetText())
-                if v and v > 0 then onSizeChange(v) end
-                self:ClearFocus()
-            end)
+            local sizeInput = Unbunk_CreateTextInput({
+                parent     = container,
+                width      = 46,
+                height     = 22,
+                numeric    = true,
+                maxLetters = 3,
+                text       = tostring(getFontSize() or 22),
+                onEnter    = function(val)
+                    if val and val > 0 then onSizeChange(val) end
+                end,
+            })
+            sizeInput.frame:SetPoint("LEFT", sizeLbl, "RIGHT", 4, 0)
+            result.sizeBox = sizeInput.editBox
         end
 
         height = height + 30
