@@ -38,6 +38,7 @@ SlashCmdList["UNBUNKUTILITY"] = function(msg)
         end)
     elseif cmd == "lock" then
         if HealerRangeAlert_SetUnlocked then HealerRangeAlert_SetUnlocked(false) end
+        if HealerRangePE then HealerRangePE.Refresh() end
         print("|cffff4444[UnbunkUtility]|r Alert locked and position saved.")
     elseif cmd == "reset" then
         HealerRangeCfg_Set("posX", 0)

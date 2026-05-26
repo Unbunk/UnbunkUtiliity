@@ -49,19 +49,6 @@ local function CreateHealerRangePanel(parent)
     probeMsg:SetWordWrap(true)
     AddModule(probeFrame, 30)
 
-    -- ── Instance filter ───────────────────────────────────────────────────────
-
-    local iF = Unbunk_CreateInstanceFilter({
-        parent    = content,
-        getConfig = function() return HealerRangeCfg_Get("instanceFilter") end,
-        setConfig = function(key, val)
-            local filter = HealerRangeCfg_Get("instanceFilter")
-            filter[key] = val
-            HealerRangeCfg_Set("instanceFilter", filter)
-        end,
-    })
-    AddModule(iF.frame, iF.height)
-
     -- ── Test Alert ────────────────────────────────────────────────────────────
 
     local testFrame = CreateFrame("Frame", nil, content)
@@ -79,6 +66,34 @@ local function CreateHealerRangePanel(parent)
     })
     testAlertBtn.frame:SetPoint("TOPLEFT", testFrame, "TOPLEFT", 0, -4)
     AddModule(testFrame, 30)
+
+    -- ── Instance filter ───────────────────────────────────────────────────────
+
+    local iF = Unbunk_CreateInstanceFilter({
+        parent    = content,
+        getConfig = function() return HealerRangeCfg_Get("instanceFilter") end,
+        setConfig = function(key, val)
+            local filter = HealerRangeCfg_Get("instanceFilter")
+            filter[key] = val
+            HealerRangeCfg_Set("instanceFilter", filter)
+        end,
+    })
+    AddModule(iF.frame, iF.height)
+
+    -- ── Icon picker ───────────────────────────────────────────────────────────
+
+    local ip = Unbunk_CreateIconPicker({
+        parent    = content,
+        getConfig = function() return HealerRangeCfg_Get("icon") end,
+        setConfig = function(key, val)
+            local cfg = HealerRangeCfg_Get("icon")
+            cfg[key] = val
+            HealerRangeCfg_Set("icon", cfg)
+            HealerRangeAlert_ApplyIcon()
+        end,
+        icons = UNBUNK_ICONS or {},
+    })
+    AddModule(ip.frame, ip.height)
 
     -- ── Sound picker ──────────────────────────────────────────────────────────
 
@@ -131,7 +146,7 @@ local function CreateHealerRangePanel(parent)
 
     -- ── Position editor ───────────────────────────────────────────────────────
 
-    local pe = HealerRange_CreatePositionEditor(content, {
+    HealerRangePE = HealerRange_CreatePositionEditor(content, {
         label       = "Alert position (offset from screen center)",
         getX        = function() return HealerRangeCfg_Get("posX") end,
         getY        = function() return HealerRangeCfg_Get("posY") end,
@@ -151,7 +166,7 @@ local function CreateHealerRangePanel(parent)
             return HealerRangeAlert_IsUnlocked and HealerRangeAlert_IsUnlocked() or false
         end,
     })
-    AddModule(pe.frame, pe.height)
+    AddModule(HealerRangePE.frame, HealerRangePE.height)
 
     local function RefreshProbeStatus()
         if not HealerRange_HasCombatProbe() then
@@ -166,8 +181,9 @@ local function CreateHealerRangePanel(parent)
         soundResult.Refresh()
         te.Refresh()
         de.Refresh()
-        pe.Refresh()
+        if HealerRangePE then HealerRangePE.Refresh() end
         iF.Refresh()
+        ip.Refresh()
         RefreshProbeStatus()
     end)
 end

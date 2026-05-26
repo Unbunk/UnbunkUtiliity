@@ -10,12 +10,13 @@ local DEFAULTS = {
     tankEnableSound  = true,
     tankFontKey      = "2002 Bold",
     tankFontPath     = nil,
-    tankFontSize     = 22,
-    tankOutline      = "",
-    tankMessage      = "Tank died!",
+    tankFontSize     = 26,
+    tankOutline      = "OUTLINE",
+    tankMessage      = "Tank died",
     tankColor        = { r = 1.0, g = 0.5, b = 0.0, a = 1.0 },
     tankPosX         = 0,
-    tankPosY         = 150,
+    tankPosY         = 350,
+    tankAlertDuration   = 3,
     -- Healer alert
     healerEnabled     = true,
     healerSoundKey    = "UnbunkUtility: Healer Died",
@@ -24,13 +25,53 @@ local DEFAULTS = {
     healerFontKey     = "2002 Bold",
     healerFontPath    = nil,
     healerFontSize    = 22,
-    healerOutline     = "",
-    healerMessage     = "Healer died!",
+    healerOutline     = "OUTLINE",
+    healerMessage     = "Healer died",
     healerColor       = { r = 0.0, g = 0.5, b = 1.0, a = 1.0 },
     healerPosX        = 0,
-    healerPosY        = 200,
-    tankAlertDuration   = 5,
-    healerAlertDuration = 5,
+    healerPosY        = 275,
+    healerAlertDuration = 3,
+    -- DPS alert
+    dpsEnabled     = false,
+    dpsSoundKey    = "UnbunkUtility: DPS Died",
+    dpsSoundPath   = nil,
+    dpsEnableSound = true,
+    dpsFontKey     = "2002 Bold",
+    dpsFontPath    = nil,
+    dpsFontSize    = 18,
+    dpsOutline     = "OUTLINE",
+    dpsMessage     = "DPS died",
+    dpsColor       = { r = 0.4, g = 0.8, b = 1.0, a = 1.0 },
+    dpsPosX        = 0,
+    dpsPosY        = 215,
+    dpsAlertDuration = 2,
+    tankIcon = {
+        enabled    = true,
+        iconPath   = "Interface\\AddOns\\UnbunkUtility\\Media\\Icons\\TankDied.tga",
+        useCustom  = false,
+        customId   = nil,
+        position   = "TOP_CENTER",
+        width      = 45,
+        height     = 60,
+    },
+    healerIcon = {
+        enabled    = true,
+        iconPath   = "Interface\\AddOns\\UnbunkUtility\\Media\\Icons\\HealerDied.tga",
+        useCustom  = false,
+        customId   = nil,
+        position   = "TOP_CENTER",
+        width      = 40,
+        height     = 50,
+    },
+    dpsIcon = {
+        enabled    = true,
+        iconPath   = "Interface\\AddOns\\UnbunkUtility\\Media\\Icons\\DPSDied.tga",
+        useCustom  = false,
+        customId   = nil,
+        position   = "TOP_CENTER",
+        width      = 25,
+        height     = 35,
+    },
     tankInstanceFilter = {
         dungeon      = true,
         raid         = true,
@@ -43,9 +84,15 @@ local DEFAULTS = {
         battleground = false,
         outdoor      = false,
     },
+    dpsInstanceFilter = {
+        dungeon      = true,
+        raid         = false,
+        battleground = false,
+        outdoor      = false,
+    },
 }
 
-local function InitDB()
+function DeathAlertCfg_Init()
     for k, v in pairs(DEFAULTS) do
         if DeathAlertDB[k] == nil then
             if type(v) == "table" then
@@ -89,6 +136,6 @@ local initDB = CreateFrame("Frame")
 initDB:RegisterEvent("ADDON_LOADED")
 initDB:SetScript("OnEvent", function(self, event, addonName)
     if addonName ~= "UnbunkUtility" then return end
-    InitDB()
+    DeathAlertCfg_Init()
     self:UnregisterEvent("ADDON_LOADED")
 end)

@@ -16,6 +16,15 @@ local DEFAULTS = {
     posX          = 0,
     posY          = 100,
     alertDuration = 5,
+    icon = {
+        enabled    = true,
+        iconPath   = "Interface\\AddOns\\UnbunkUtility\\Media\\Icons\\NoHeal.tga",
+        useCustom  = false,
+        customId   = nil,
+        position   = "TOP_CENTER",
+        width      = 32,
+        height     = 32,
+    },
     instanceFilter = {
         dungeon      = true,
         raid         = true,
@@ -27,7 +36,7 @@ local DEFAULTS = {
 local FALLBACK_SOUND_ID = 8959
 local FALLBACK_SOUND_NAME = "UnbunkUtility: No Heal"
 
-local function InitDB()
+function HealerRangeCfg_Init()
     for k, v in pairs(DEFAULTS) do
         if HealerRangeDB[k] == nil then
             if type(v) == "table" then
@@ -70,6 +79,6 @@ local initDB = CreateFrame("Frame")
 initDB:RegisterEvent("ADDON_LOADED")
 initDB:SetScript("OnEvent", function(self, event, addonName)
     if addonName ~= "UnbunkUtility" then return end
-    InitDB()
+    HealerRangeCfg_Init()
     self:UnregisterEvent("ADDON_LOADED")
 end)

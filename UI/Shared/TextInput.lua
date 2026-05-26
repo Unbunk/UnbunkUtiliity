@@ -46,10 +46,19 @@ function Unbunk_CreateTextInput(config)
     editBox:SetFontObject("GameFontHighlightSmall")
     editBox:SetTextColor(1, 1, 1, 1)
 
-    if numeric then
-        editBox:SetNumeric(true)
-    end
+    editBox:SetScript("OnChar", function(self, char)
+        if not numeric then return end
+        local text = self:GetText()
+        -- Permet le tiret seulement en première position
+        if char == "-" and #text > 1 then
+            self:SetText(text:gsub("-", ""))
+        end
+    end)
 
+    editBox:SetScript("OnEnterPressed", function(self)
+        if onEnter then onEnter(numeric and tonumber(self:GetText()) or self:GetText()) end
+        self:ClearFocus()
+    end)
     if text ~= "" then
         editBox:SetText(text)
     end

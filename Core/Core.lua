@@ -3,6 +3,7 @@
 
 UnbunkUtility = {}
 local registeredModules = {}
+UnbunkUtility.registeredModules = registeredModules
 local window
 local navbar
 local contentArea
@@ -46,19 +47,31 @@ local function ShowModule(index)
     end
 end
 
+function UnbunkUtility.ShowActiveModule()
+    if activeTab then
+        ShowModule(activeTab)
+    end
+end
+
 local function BuildNavbar()
     for _, btn in ipairs(tabButtons) do btn:Hide() end
     tabButtons = {}
 
-    local TAB_WIDTH  = 120
-    local TAB_HEIGHT = 28
-    local TAB_GAP    = 4
-    local x = 0
+    local TAB_WIDTH   = 130
+    local TAB_HEIGHT  = 28
+    local TAB_GAP     = 4
+    local TABS_PER_ROW = 4
+    local navbarHeight = 0
 
     for i, mod in ipairs(registeredModules) do
+        local row = math.floor((i - 1) / TABS_PER_ROW)
+        local col = (i - 1) % TABS_PER_ROW
+        local x   = col * (TAB_WIDTH + TAB_GAP)
+        local y   = -(row * (TAB_HEIGHT + TAB_GAP))
+
         local btn = CreateFrame("Button", nil, navbar, "BackdropTemplate")
         btn:SetSize(TAB_WIDTH, TAB_HEIGHT)
-        btn:SetPoint("LEFT", navbar, "LEFT", x, 0)
+        btn:SetPoint("TOPLEFT", navbar, "TOPLEFT", x, y)
         btn:SetBackdrop({
             bgFile   = "Interface/Tooltips/UI-Tooltip-Background",
             edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
@@ -89,14 +102,19 @@ local function BuildNavbar()
 
         btn:SetScript("OnClick", function() ShowModule(i) end)
         tabButtons[i] = btn
-        x = x + TAB_WIDTH + TAB_GAP
+
+        local rows = math.ceil(#registeredModules / TABS_PER_ROW)
+        navbarHeight = rows * (TAB_HEIGHT + TAB_GAP)
     end
+
+    navbar:SetHeight(navbarHeight)
 end
 
 local function CreateMainWindow()
     window = CreateFrame("Frame", "UnbunkUtilityWindow", UIParent, "BackdropTemplate")
-    window:SetSize(600, 500)
+    window:SetSize(600, 800)
     window:SetPoint("CENTER")
+    window:SetFrameStrata("HIGH")
     window:SetMovable(true)
     window:EnableMouse(true)
     window:RegisterForDrag("LeftButton")
@@ -120,10 +138,12 @@ local function CreateMainWindow()
     closeBtn:SetPoint("TOPRIGHT", -4, -4)
     closeBtn:SetScript("OnClick", function() window:Hide() end)
 
+    table.insert(UISpecialFrames, "UnbunkUtilityWindow")    
+
     navbar = CreateFrame("Frame", nil, window)
     navbar:SetPoint("TOPLEFT", window, "TOPLEFT", 16, -40)
     navbar:SetPoint("TOPRIGHT", window, "TOPRIGHT", -16, -40)
-    navbar:SetHeight(28)
+    navbar:SetHeight(64) -- sera mis à jour par BuildNavbar
 
     local sep = window:CreateTexture(nil, "ARTWORK")
     sep:SetColorTexture(0.4, 0.4, 0.4, 0.8)
@@ -156,7 +176,7 @@ local function CreateMainWindow()
         visibleItems = 10,
         getListSize  = function() return 20 end,
     })
-    sb.track:SetPoint("TOPRIGHT", window, "TOPRIGHT", -6, -80)
+    sb.track:SetPoint("TOPRIGHT", window, "TOPRIGHT", -6, -110)
     sb.track:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", -6, 16)
     sb.track:Show()
 
@@ -165,12 +185,6 @@ local function CreateMainWindow()
             sb.Update()
         end)
     end)
-
-    BuildNavbar()
-
-    if #registeredModules > 0 then
-        ShowModule(1)
-    end
 end
 
 function UnbunkUtility.OpenWindow()
@@ -186,5 +200,12 @@ local initCore = CreateFrame("Frame")
 initCore:RegisterEvent("PLAYER_LOGIN")
 initCore:SetScript("OnEvent", function(self)
     CreateMainWindow()
+    -- Rebuild navbar après que tous les modules sont enregistrés
+    C_Timer.After(0, function()
+        BuildNavbar()
+        if #registeredModules > 0 then
+            ShowModule(1)
+        end
+    end)
     self:UnregisterEvent("PLAYER_LOGIN")
 end)

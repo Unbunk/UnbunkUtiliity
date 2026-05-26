@@ -2,6 +2,7 @@
 
 local TANK_ROLES   = { TANK = true }
 local HEALER_ROLES = { HEALER = true }
+local DPS_ROLES    = { DAMAGER = true }
 
 local function IsDeathAlertActiveInCurrentInstance(prefix)
     local filter = DeathAlertCfg_Get(prefix .. "InstanceFilter")
@@ -84,6 +85,11 @@ eventFrame:SetScript("OnEvent", function(self, event, unit)
                     if not DeathAlert_IsHealerTesting() then
                         ShowAlert(DeathAlert_GetHealerFrame(), DeathAlertCfg_Get("healerAlertDuration") or 5)
                         DeathAlertPlaySound("healer")
+                    end
+                elseif DPS_ROLES[role] and DeathAlertCfg_Get("dpsEnabled") and IsDeathAlertActiveInCurrentInstance("dps") then
+                    if not DeathAlert_IsDpsTesting() then
+                        ShowAlert(DeathAlert_GetDpsFrame(), DeathAlertCfg_Get("dpsAlertDuration") or 5)
+                        DeathAlertPlaySound("dps")
                     end
                 end
             end

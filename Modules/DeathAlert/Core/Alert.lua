@@ -1,179 +1,106 @@
 -- Modules/DeathAlert/Core/Alert.lua
 
-local tankTesting   = false
-local healerTesting = false
+local TANK_KEY_MAP = {
+    alertMessage = "tankMessage",
+    fontPath     = "tankFontPath",
+    fontKey      = "tankFontKey",
+    fontSize     = "tankFontSize",
+    outline      = "tankOutline",
+    color        = "tankColor",
+    posX         = "tankPosX",
+    posY         = "tankPosY",
+    icon         = "tankIcon",
+}
 
--- ── Tank alert frame ──────────────────────────────────────────────────────────
+local HEALER_KEY_MAP = {
+    alertMessage = "healerMessage",
+    fontPath     = "healerFontPath",
+    fontKey      = "healerFontKey",
+    fontSize     = "healerFontSize",
+    outline      = "healerOutline",
+    color        = "healerColor",
+    posX         = "healerPosX",
+    posY         = "healerPosY",
+    icon         = "healerIcon",
+}
 
-local tankFrame = CreateFrame("Frame", "DeathAlertTankFrame", UIParent, "BackdropTemplate")
-tankFrame:SetSize(260, 60)
-tankFrame:Hide()
+local DPS_KEY_MAP = {
+    alertMessage = "dpsMessage",
+    fontPath     = "dpsFontPath",
+    fontKey      = "dpsFontKey",
+    fontSize     = "dpsFontSize",
+    outline      = "dpsOutline",
+    color        = "dpsColor",
+    posX         = "dpsPosX",
+    posY         = "dpsPosY",
+    icon         = "dpsIcon",
+}
 
-local tankText = tankFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-tankText:SetPoint("CENTER")
-tankText:SetText("Tank died!")
+local tankAlert = Unbunk_CreateAlertFrame({
+    name   = "DeathAlertTankFrame",
+    getCfg = function(key) return DeathAlertCfg_Get(TANK_KEY_MAP[key] or key) end,
+    onDragStop = function(x, y)
+        DeathAlertCfg_Set("tankPosX", x)
+        DeathAlertCfg_Set("tankPosY", y)
+        if _G["DeathAlert_PE_tank"] then _G["DeathAlert_PE_tank"].Refresh() end
+    end,
+})
 
-local tankAG = tankFrame:CreateAnimationGroup()
-tankAG:SetLooping("BOUNCE")
-local tankAnim = tankAG:CreateAnimation("Alpha")
-tankAnim:SetFromAlpha(1)
-tankAnim:SetToAlpha(0.3)
-tankAnim:SetDuration(0.5)
-tankAG:Play()
+local healerAlert = Unbunk_CreateAlertFrame({
+    name   = "DeathAlertHealerFrame",
+    getCfg = function(key) return DeathAlertCfg_Get(HEALER_KEY_MAP[key] or key) end,
+    onDragStop = function(x, y)
+        DeathAlertCfg_Set("healerPosX", x)
+        DeathAlertCfg_Set("healerPosY", y)
+        if _G["DeathAlert_PE_healer"] then _G["DeathAlert_PE_healer"].Refresh() end
+    end,
+})
 
--- ── Healer alert frame ────────────────────────────────────────────────────────
+local dpsAlert = Unbunk_CreateAlertFrame({
+    name   = "DeathAlertDpsFrame",
+    getCfg = function(key) return DeathAlertCfg_Get(DPS_KEY_MAP[key] or key) end,
+    onDragStop = function(x, y)
+        DeathAlertCfg_Set("dpsPosX", x)
+        DeathAlertCfg_Set("dpsPosY", y)
+        if _G["DeathAlert_PE_dps"] then _G["DeathAlert_PE_dps"].Refresh() end
+    end,
+})
 
-local healerFrame = CreateFrame("Frame", "DeathAlertHealerFrame", UIParent, "BackdropTemplate")
-healerFrame:SetSize(260, 60)
-healerFrame:Hide()
+-- Tank
+function DeathAlert_ApplyTankFont()     tankAlert.ApplyFont()     end
+function DeathAlert_ApplyTankColor()    tankAlert.ApplyColor()    end
+function DeathAlert_ApplyTankMessage()  tankAlert.ApplyMessage()  end
+function DeathAlert_ApplyTankPosition() tankAlert.ApplyPosition() end
+function DeathAlert_ApplyTankIcon()     tankAlert.ApplyIcon()     end
+function DeathAlert_SetTankUnlocked(v)  tankAlert.SetUnlocked(v)  end
+function DeathAlert_IsTankUnlocked()    return tankAlert.IsUnlocked() end
+function DeathAlert_SetTankTesting(v)   tankAlert.SetTesting(v)   end
+function DeathAlert_IsTankTesting()     return tankAlert.IsTesting()  end
+function DeathAlert_GetTankFrame()      return tankAlert.GetFrame()   end
 
-local healerText = healerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-healerText:SetPoint("CENTER")
-healerText:SetText("Healer died!")
+-- Healer
+function DeathAlert_ApplyHealerFont()     healerAlert.ApplyFont()     end
+function DeathAlert_ApplyHealerColor()    healerAlert.ApplyColor()    end
+function DeathAlert_ApplyHealerMessage()  healerAlert.ApplyMessage()  end
+function DeathAlert_ApplyHealerPosition() healerAlert.ApplyPosition() end
+function DeathAlert_ApplyHealerIcon()     healerAlert.ApplyIcon()     end
+function DeathAlert_SetHealerUnlocked(v)  healerAlert.SetUnlocked(v)  end
+function DeathAlert_IsHealerUnlocked()    return healerAlert.IsUnlocked() end
+function DeathAlert_SetHealerTesting(v)   healerAlert.SetTesting(v)   end
+function DeathAlert_IsHealerTesting()     return healerAlert.IsTesting()  end
+function DeathAlert_GetHealerFrame()      return healerAlert.GetFrame()   end
 
-local healerAG = healerFrame:CreateAnimationGroup()
-healerAG:SetLooping("BOUNCE")
-local healerAnim = healerAG:CreateAnimation("Alpha")
-healerAnim:SetFromAlpha(1)
-healerAnim:SetToAlpha(0.3)
-healerAnim:SetDuration(0.5)
-healerAG:Play()
-
--- ── Apply functions ───────────────────────────────────────────────────────────
-
-function DeathAlert_ApplyTankFont()
-    local path = DeathAlertCfg_Get("tankFontPath")
-    local size = DeathAlertCfg_Get("tankFontSize") or 22
-    local outline = DeathAlertCfg_Get("tankOutline") or ""
-    tankText:SetFont(path or "Fonts\\FRIZQT__.TTF", size, outline)
-end
-
-function DeathAlert_ApplyTankColor()
-    local c = DeathAlertCfg_Get("tankColor")
-    tankText:SetTextColor(c.r, c.g, c.b, c.a)
-end
-
-function DeathAlert_ApplyTankMessage()
-    tankText:SetText(DeathAlertCfg_Get("tankMessage") or "Tank died!")
-end
-
-function DeathAlert_ApplyTankPosition()
-    tankFrame:ClearAllPoints()
-    tankFrame:SetPoint("CENTER", UIParent, "CENTER",
-        DeathAlertCfg_Get("tankPosX"),
-        DeathAlertCfg_Get("tankPosY"))
-end
-
-function DeathAlert_SetTankUnlocked(unlocked)
-    if unlocked then
-        tankFrame:SetMovable(true)
-        tankFrame:EnableMouse(true)
-        tankFrame:RegisterForDrag("LeftButton")
-        tankFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-        tankFrame:SetScript("OnDragStop", function(self)
-            self:StopMovingOrSizing()
-            local _, _, _, x, y = self:GetPoint()
-            DeathAlertCfg_Set("tankPosX", math.floor(x))
-            DeathAlertCfg_Set("tankPosY", math.floor(y))
-        end)
-        tankFrame:SetBackdrop({
-            edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-            edgeSize = 10,
-        })
-        tankFrame:SetBackdropBorderColor(1, 1, 0, 0.8)
-        tankFrame:Show()
-    else
-        tankFrame:SetMovable(false)
-        tankFrame:EnableMouse(false)
-        tankFrame:SetScript("OnDragStart", nil)
-        tankFrame:SetScript("OnDragStop", nil)
-        tankFrame:SetBackdrop(nil)
-        tankFrame:Hide()
-    end
-end
-
-function DeathAlert_IsTankUnlocked()
-    return tankFrame:IsMovable()
-end
-
-function DeathAlert_SetTankTesting(val)
-    tankTesting = val
-end
-
-function DeathAlert_IsTankTesting()
-    return tankTesting
-end
-
-function DeathAlert_GetTankFrame()
-    return tankFrame
-end
-
-function DeathAlert_ApplyHealerFont()
-    local path = DeathAlertCfg_Get("healerFontPath")
-    local size = DeathAlertCfg_Get("healerFontSize") or 22
-    local outline = DeathAlertCfg_Get("healerOutline") or ""
-    healerText:SetFont(path or "Fonts\\FRIZQT__.TTF", size, outline)
-end
-
-function DeathAlert_ApplyHealerColor()
-    local c = DeathAlertCfg_Get("healerColor")
-    healerText:SetTextColor(c.r, c.g, c.b, c.a)
-end
-
-function DeathAlert_ApplyHealerMessage()
-    healerText:SetText(DeathAlertCfg_Get("healerMessage") or "Healer died!")
-end
-
-function DeathAlert_ApplyHealerPosition()
-    healerFrame:ClearAllPoints()
-    healerFrame:SetPoint("CENTER", UIParent, "CENTER",
-        DeathAlertCfg_Get("healerPosX"),
-        DeathAlertCfg_Get("healerPosY"))
-end
-
-function DeathAlert_SetHealerUnlocked(unlocked)
-    if unlocked then
-        healerFrame:SetMovable(true)
-        healerFrame:EnableMouse(true)
-        healerFrame:RegisterForDrag("LeftButton")
-        healerFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-        healerFrame:SetScript("OnDragStop", function(self)
-            self:StopMovingOrSizing()
-            local _, _, _, x, y = self:GetPoint()
-            DeathAlertCfg_Set("healerPosX", math.floor(x))
-            DeathAlertCfg_Set("healerPosY", math.floor(y))
-        end)
-        healerFrame:SetBackdrop({
-            edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-            edgeSize = 10,
-        })
-        healerFrame:SetBackdropBorderColor(1, 1, 0, 0.8)
-        healerFrame:Show()
-    else
-        healerFrame:SetMovable(false)
-        healerFrame:EnableMouse(false)
-        healerFrame:SetScript("OnDragStart", nil)
-        healerFrame:SetScript("OnDragStop", nil)
-        healerFrame:SetBackdrop(nil)
-        healerFrame:Hide()
-    end
-end
-
-function DeathAlert_IsHealerUnlocked()
-    return healerFrame:IsMovable()
-end
-
-function DeathAlert_SetHealerTesting(val)
-    healerTesting = val
-end
-
-function DeathAlert_IsHealerTesting()
-    return healerTesting
-end
-
-function DeathAlert_GetHealerFrame()
-    return healerFrame
-end
+-- DPS
+function DeathAlert_ApplyDpsFont()     dpsAlert.ApplyFont()     end
+function DeathAlert_ApplyDpsColor()    dpsAlert.ApplyColor()    end
+function DeathAlert_ApplyDpsMessage()  dpsAlert.ApplyMessage()  end
+function DeathAlert_ApplyDpsPosition() dpsAlert.ApplyPosition() end
+function DeathAlert_ApplyDpsIcon()     dpsAlert.ApplyIcon()     end
+function DeathAlert_SetDpsUnlocked(v)  dpsAlert.SetUnlocked(v)  end
+function DeathAlert_IsDpsUnlocked()    return dpsAlert.IsUnlocked() end
+function DeathAlert_SetDpsTesting(v)   dpsAlert.SetTesting(v)   end
+function DeathAlert_IsDpsTesting()     return dpsAlert.IsTesting()  end
+function DeathAlert_GetDpsFrame()      return dpsAlert.GetFrame()   end
 
 local initAlert = CreateFrame("Frame")
 initAlert:RegisterEvent("PLAYER_LOGIN")
@@ -182,9 +109,16 @@ initAlert:SetScript("OnEvent", function(self)
     DeathAlert_ApplyTankColor()
     DeathAlert_ApplyTankMessage()
     DeathAlert_ApplyTankPosition()
+    DeathAlert_ApplyTankIcon()
     DeathAlert_ApplyHealerFont()
     DeathAlert_ApplyHealerColor()
     DeathAlert_ApplyHealerMessage()
     DeathAlert_ApplyHealerPosition()
+    DeathAlert_ApplyHealerIcon()
+    DeathAlert_ApplyDpsFont()
+    DeathAlert_ApplyDpsColor()
+    DeathAlert_ApplyDpsMessage()
+    DeathAlert_ApplyDpsPosition()
+    DeathAlert_ApplyDpsIcon()
     self:UnregisterEvent("PLAYER_LOGIN")
 end)

@@ -22,7 +22,7 @@ function HealerRange_CreateSoundPicker(parent, LSM, config)
 
     local soundCheckbox = Unbunk_CreateCheckbox({
         parent  = container,
-        label   = "Alert sound",
+        label   = config.label or "Alert sound",
         checked = getSoundEnable() ~= false,
         onClick = function(val) onEnableToggle(val) end,
     })

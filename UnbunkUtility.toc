@@ -3,12 +3,13 @@
 ## Notes: Utility addon
 ## Author: You
 ## Version: 1.0
-## SavedVariables: HealerRangeDB, DeathAlertDB
+## SavedVariables: HealerRangeDB, DeathAlertDB, BLTrackerDB, PotionTrackerDB, TrinketTrackerDB, UnbunkUtilityDB, PITrackerDB, PlayerDeathDB
 
 Libs/LibStub-1.0/LibStub.lua
 Libs/CallbackHandler-1.0/CallbackHandler-1.0.lua
 Libs/LibRangeCheck-3.0/LibRangeCheck-3.0.lua
 Media/Media.lua
+UI/Shared/IconPicker.lua
 UI/Shared/ScrollBar.lua
 UI/Shared/Button.lua
 UI/Shared/TextInput.lua
@@ -21,8 +22,13 @@ UI/Shared/SoundPicker.lua
 UI/Shared/FontPicker.lua
 UI/Shared/DurationEditor.lua
 UI/Shared/InstanceFilter.lua
+UI/Shared/AlertFrame.lua
+UI/Shared/TimerIcon.lua
+UI/Shared/ItemTracker.lua
 Core/Core.lua
 Core/SlashCommands.lua
+Core/Profiles.lua
+Modules/GeneralSettings/UI/ConfigWindow.lua
 Modules/HealerRange/Core/Config.lua
 Modules/HealerRange/Core/Alert.lua
 Modules/HealerRange/Core/RangeCheck.lua
@@ -31,3 +37,18 @@ Modules/DeathAlert/Core/Config.lua
 Modules/DeathAlert/Core/Alert.lua
 Modules/DeathAlert/Core/DeathCheck.lua
 Modules/DeathAlert/UI/ConfigWindow.lua
+Modules/BLTracker/Core/Config.lua
+Modules/BLTracker/Core/BLTracker.lua
+Modules/BLTracker/UI/ConfigWindow.lua
+Modules/PotionTracker/Core/Config.lua
+Modules/PotionTracker/Core/PotionTracker.lua
+Modules/PotionTracker/UI/ConfigWindow.lua
+Modules/TrinketTracker/Core/Config.lua
+Modules/TrinketTracker/Core/TrinketTracker.lua
+Modules/TrinketTracker/UI/ConfigWindow.lua
+Modules/PITracker/Core/Config.lua
+Modules/PITracker/Core/PITracker.lua
+Modules/PITracker/UI/ConfigWindow.lua
+Modules/PlayerDeathAnimation/Core/Config.lua
+Modules/PlayerDeathAnimation/Core/PlayerDeathAnimation.lua
+Modules/PlayerDeathAnimation/UI/ConfigWindow.lua

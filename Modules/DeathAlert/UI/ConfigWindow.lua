@@ -17,6 +17,35 @@ local function CreateAlertSection(parent, prefix)
         lastFrame = frame
     end
 
+     -- ── Test button ───────────────────────────────────────────────────────────
+
+    local testFrame = CreateFrame("Frame", nil, parent)
+    testFrame:SetHeight(26)
+
+    local testBtnWidget = Unbunk_CreateButton({
+        parent  = testFrame,
+        label   = "Test Alert",
+        width   = 100,
+        height  = 22,
+        onClick = function()
+            local getFrame = prefix == "tank" and DeathAlert_GetTankFrame or
+                         prefix == "healer" and DeathAlert_GetHealerFrame or
+                         DeathAlert_GetDpsFrame
+            local setTest  = prefix == "tank" and DeathAlert_SetTankTesting or
+                         prefix == "healer" and DeathAlert_SetHealerTesting or
+                         DeathAlert_SetDpsTesting
+            setTest(true)
+            getFrame():Show()
+            DeathAlertPlaySound(prefix)
+            C_Timer.After(5, function()
+                setTest(false)
+                getFrame():Hide()
+            end)
+        end,
+    })
+    testBtnWidget.frame:SetPoint("TOPLEFT", testFrame, "TOPLEFT", 0, -2)
+    AddWidget(testFrame, 26) 
+
     -- ── Instance filter ───────────────────────────────────────────────────────
 
     local iF = Unbunk_CreateInstanceFilter({
@@ -31,30 +60,23 @@ local function CreateAlertSection(parent, prefix)
     iF.frame:ClearAllPoints()
     AddWidget(iF.frame, iF.height)
 
-    -- ── Test button ───────────────────────────────────────────────────────────
+    -- ── Icon picker ───────────────────────────────────────────────────────────
 
-    local testFrame = CreateFrame("Frame", nil, parent)
-    testFrame:SetHeight(26)
-
-    local testBtnWidget = Unbunk_CreateButton({
-        parent  = testFrame,
-        label   = "Test Alert",
-        width   = 100,
-        height  = 22,
-        onClick = function()
-            local getFrame = prefix == "tank" and DeathAlert_GetTankFrame or DeathAlert_GetHealerFrame
-            local setTest  = prefix == "tank" and DeathAlert_SetTankTesting or DeathAlert_SetHealerTesting
-            setTest(true)
-            getFrame():Show()
-            DeathAlertPlaySound(prefix)
-            C_Timer.After(5, function()
-                setTest(false)
-                getFrame():Hide()
-            end)
+    local ip = Unbunk_CreateIconPicker({
+        parent    = parent,
+        getConfig = function() return DeathAlertCfg_Get(prefix .. "Icon") end,
+        setConfig = function(key, val)
+            local cfg = DeathAlertCfg_Get(prefix .. "Icon")
+            cfg[key] = val
+            DeathAlertCfg_Set(prefix .. "Icon", cfg)
+            if prefix == "tank" then DeathAlert_ApplyTankIcon()
+            elseif prefix == "healer" then DeathAlert_ApplyHealerIcon()
+            else DeathAlert_ApplyDpsIcon() end
         end,
+        icons = UNBUNK_ICONS or {},
     })
-    testBtnWidget.frame:SetPoint("TOPLEFT", testFrame, "TOPLEFT", 0, -2)
-    AddWidget(testFrame, 26)
+    ip.frame:ClearAllPoints()
+    AddWidget(ip.frame, ip.height)
 
     -- ── Sound picker ──────────────────────────────────────────────────────────
 
@@ -89,28 +111,33 @@ local function CreateAlertSection(parent, prefix)
         onTextChange    = function(txt)
             DeathAlertCfg_Set(prefix .. "Message", txt)
             if prefix == "tank" then DeathAlert_ApplyTankMessage()
-            else DeathAlert_ApplyHealerMessage() end
+            elseif prefix == "healer" then DeathAlert_ApplyHealerMessage()
+            else DeathAlert_ApplyDpsMessage() end
         end,
         onFontChange    = function(key, path)
             DeathAlertCfg_Set(prefix .. "FontKey", key)
             DeathAlertCfg_Set(prefix .. "FontPath", path)
             if prefix == "tank" then DeathAlert_ApplyTankFont()
-            else DeathAlert_ApplyHealerFont() end
+            elseif prefix == "healer" then DeathAlert_ApplyHealerFont()
+            else DeathAlert_ApplyDpsFont() end
         end,
         onSizeChange    = function(size)
             DeathAlertCfg_Set(prefix .. "FontSize", size)
             if prefix == "tank" then DeathAlert_ApplyTankFont()
-            else DeathAlert_ApplyHealerFont() end
+            elseif prefix == "healer" then DeathAlert_ApplyHealerFont()
+            else DeathAlert_ApplyDpsFont() end
         end,
         onColorChange   = function(r, g, b, a)
             DeathAlertCfg_Set(prefix .. "Color", { r=r, g=g, b=b, a=a })
             if prefix == "tank" then DeathAlert_ApplyTankColor()
-            else DeathAlert_ApplyHealerColor() end
+            elseif prefix == "healer" then DeathAlert_ApplyHealerColor()
+            else DeathAlert_ApplyDpsColor() end
         end,
         onOutlineChange = function(outline)
             DeathAlertCfg_Set(prefix .. "Outline", outline)
             if prefix == "tank" then DeathAlert_ApplyTankFont()
-            else DeathAlert_ApplyHealerFont() end
+            elseif prefix == "healer" then DeathAlert_ApplyHealerFont()
+            else DeathAlert_ApplyDpsFont() end
         end,
     })
     te.frame:ClearAllPoints()
@@ -118,7 +145,8 @@ local function CreateAlertSection(parent, prefix)
 
     -- ── Position editor ───────────────────────────────────────────────────────
 
-    local pe = HealerRange_CreatePositionEditor(parent, {
+    local peName = "DeathAlert_PE_" .. prefix
+    _G[peName] = HealerRange_CreatePositionEditor(parent, {
         label      = "Alert position (offset from screen center)",
         getX       = function() return DeathAlertCfg_Get(prefix .. "PosX") end,
         getY       = function() return DeathAlertCfg_Get(prefix .. "PosY") end,
@@ -126,24 +154,27 @@ local function CreateAlertSection(parent, prefix)
             if x  then DeathAlertCfg_Set(prefix .. "PosX", x)  end
             if yv then DeathAlertCfg_Set(prefix .. "PosY", yv) end
             if prefix == "tank" then DeathAlert_ApplyTankPosition()
-            else DeathAlert_ApplyHealerPosition() end
+            elseif prefix == "healer" then DeathAlert_ApplyHealerPosition()
+            else DeathAlert_ApplyDpsPosition() end
         end,
         onUnlock   = function()
             if prefix == "tank" then DeathAlert_SetTankUnlocked(true)
-            else DeathAlert_SetHealerUnlocked(true) end
-            print("|cffff4444[UnbunkUtility]|r Alert unlocked — drag to reposition, then /ubu lock to save.")
+            elseif prefix == "healer" then DeathAlert_SetHealerUnlocked(true)
+            else DeathAlert_SetDpsUnlocked(true) end
         end,
         onLock     = function()
             if prefix == "tank" then DeathAlert_SetTankUnlocked(false)
-            else DeathAlert_SetHealerUnlocked(false) end
+            elseif prefix == "healer" then DeathAlert_SetHealerUnlocked(false)
+            else DeathAlert_SetDpsUnlocked(false) end
         end,
         isUnlocked = function()
             if prefix == "tank" then return DeathAlert_IsTankUnlocked()
-            else return DeathAlert_IsHealerUnlocked() end
+            elseif prefix == "healer" then return DeathAlert_IsHealerUnlocked()
+            else return DeathAlert_IsDpsUnlocked() end
         end,
     })
-    pe.frame:ClearAllPoints()
-    AddWidget(pe.frame, pe.height)
+    _G[peName].frame:ClearAllPoints()
+    AddWidget(_G[peName].frame, _G[peName].height)
 
     -- ── Duration editor ───────────────────────────────────────────────────────
 
@@ -160,9 +191,10 @@ local function CreateAlertSection(parent, prefix)
     return height, {
         sound = soundResult.Refresh,
         te    = te.Refresh,
-        pe    = pe.Refresh,
+        pe    = _G[peName].Refresh,
         de    = de.Refresh,
         iF    = iF.Refresh,
+        ip    = ip.Refresh,
     }
 end
 
@@ -214,6 +246,21 @@ local function CreateDeathAlertPanel(parent)
     })
     AddSection(healerCS.frame)
 
+    -- ── DPS section ────────────────────────────────────────────────────────
+
+    local dpsCS = Unbunk_CreateCollapsibleSection({
+        parent        = content,
+        label         = "DPS Death Alert",
+        isChecked     = function() return DeathAlertCfg_Get("dpsEnabled") end,
+        onCheck       = function(val) DeathAlertCfg_Set("dpsEnabled", val) end,
+        createContent = function(sectionParent)
+            local h, fns = CreateAlertSection(sectionParent, "dps")
+            allRefreshFns.dps = fns
+            return h
+        end,
+    })
+    AddSection(dpsCS.frame)
+
     -- ── OnShow refresh ────────────────────────────────────────────────────────
 
     parent:HookScript("OnShow", function()
@@ -231,8 +278,17 @@ local function CreateDeathAlertPanel(parent)
             if allRefreshFns.healer.de then allRefreshFns.healer.de() end
             if allRefreshFns.healer.iF then allRefreshFns.healer.iF() end
         end
+        if allRefreshFns.dps then
+            allRefreshFns.dps.sound()
+            allRefreshFns.dps.te()
+            allRefreshFns.dps.pe()
+            if allRefreshFns.dps.de then allRefreshFns.dps.de() end
+            if allRefreshFns.dps.iF then allRefreshFns.dps.iF() end
+            if allRefreshFns.dps.ip then allRefreshFns.dps.ip() end
+        end
         tankCS.Refresh()
         healerCS.Refresh()
+        dpsCS.Refresh()
     end)
 end
 

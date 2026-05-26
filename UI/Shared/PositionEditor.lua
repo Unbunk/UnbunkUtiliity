@@ -39,12 +39,9 @@ function HealerRange_CreatePositionEditor(parent, config)
         parent     = container,
         width      = 70,
         height     = 22,
-        numeric    = true,
-        maxLetters = 6,
+        numeric    = false,
+        maxLetters = 7,
         text       = tostring(getX() or 0),
-        onEnter    = function(val)
-            if onApply then onApply(val, tonumber(yInput.GetText())) end
-        end,
     })
     xInput.frame:SetPoint("TOPLEFT", container, "TOPLEFT", 0, -height)
     result.xBox = xInput.editBox
@@ -53,13 +50,24 @@ function HealerRange_CreatePositionEditor(parent, config)
         parent     = container,
         width      = 70,
         height     = 22,
-        numeric    = true,
-        maxLetters = 6,
+        numeric    = false,
+        maxLetters = 7,
         text       = tostring(getY() or 0),
-        onEnter    = function(val)
-            if onApply then onApply(tonumber(xInput.GetText()), val) end
-        end,
     })
+
+    xInput.editBox:SetScript("OnEnterPressed", function(self)
+        local x = tonumber(self:GetText())
+        local y = tonumber(yInput.GetText())
+        if x and y and onApply then onApply(x, y) end
+        self:ClearFocus()
+    end)
+
+    yInput.editBox:SetScript("OnEnterPressed", function(self)
+        local x = tonumber(xInput.GetText())
+        local y = tonumber(self:GetText())
+        if x and y and onApply then onApply(x, y) end
+        self:ClearFocus()
+    end)
     yInput.frame:SetPoint("LEFT", xInput.frame, "RIGHT", 40, 0)
     result.yBox = yInput.editBox
 
@@ -70,7 +78,7 @@ function HealerRange_CreatePositionEditor(parent, config)
         height = 22,
     })
     local unlockBtn = unlockBtnWidget.frame
-    unlockBtn:SetPoint("LEFT", yBox, "RIGHT", 10, 2)
+    unlockBtn:SetPoint("LEFT", yInput.frame, "RIGHT", 10, 2)
     result.unlockBtn = unlockBtn
 
     local currentlyUnlocked = false
@@ -82,8 +90,8 @@ function HealerRange_CreatePositionEditor(parent, config)
             if onUnlock then onUnlock() end
         else
             unlockBtnWidget.SetText("Unlock")
-            xBox:SetText(tostring(getX() or 0))
-            yBox:SetText(tostring(getY() or 0))
+            xInput.SetText(tostring(getX() or 0))
+            yInput.SetText(tostring(getY() or 0))
             if onLock then onLock() end
         end
     end)
