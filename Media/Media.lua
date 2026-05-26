@@ -32,6 +32,7 @@ initMedia:SetScript("OnEvent", function(self, event, addonName)
 
         local ICON_PATH = "Interface\\AddOns\\UnbunkUtility\\Media\\Icons\\"
         UNBUNK_ICONS = {
+            { label = "Unbunk",      path = ICON_PATH .. "Unbunk.tga"    },
             { label = "No Heal",     path = ICON_PATH .. "NoHeal.tga"     },
             { label = "Green Check", path = ICON_PATH .. "GreenCheck.tga" },
             { label = "Healer",      path = ICON_PATH .. "Healer.tga"     },

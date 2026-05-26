@@ -4,6 +4,7 @@
 ## Author: You
 ## Version: 1.0
 ## SavedVariables: HealerRangeDB, DeathAlertDB, BLTrackerDB, PotionTrackerDB, TrinketTrackerDB, UnbunkUtilityDB, PITrackerDB, PlayerDeathDB
+## IconTexture: Interface\AddOns\UnbunkUtility\Media\Icons\Unbunk.tga
 
 Libs/LibStub-1.0/LibStub.lua
 Libs/CallbackHandler-1.0/CallbackHandler-1.0.lua
